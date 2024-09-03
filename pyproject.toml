@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "cetuximab-binding-model"
+version = "0.1.0"
+description = "Fitting a binding model to cetuximab cytokine release assay."
+authors = ["Armaan Abraham <armaanabraham@g.ucla.edu>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+numpy = "^1.26.4"
+matplotlib = "^3.9"
+seaborn = "^0.13"
+ipykernel = "^6.29.4"
+pandas = "^2.2"
+jax = "^0.4.30"
+jaxopt = {git = "https://github.com/google/jaxopt.git", rev = "4a50198"}
+ruff = "^0.5"
+openpyxl = "^3.1.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
