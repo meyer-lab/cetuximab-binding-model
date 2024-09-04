@@ -135,6 +135,6 @@ stratifiers = {
 }
 
 param_bounds = {
-    "log_rbound_signal_coeff": (-9.0, 0.0),
+    "log_rbound_signal_coeff": (-9.0, 5),
     "eff_cancer_cell_valency": (0, 100),
 }
