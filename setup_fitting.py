@@ -8,10 +8,10 @@ from binding_model import infer_Rbound_batched
 THIS_DIR = Path(__file__).parent
 
 RCPS = [
-    "FcgRIIA-131R",
-    "FcgRIIB",
+    # "FcgRIIA-131R",
+    # "FcgRIIB",
     "FcgRIIIA-158V",
-    "FcgRIIIB",
+    # "FcgRIIIB",
 ]
 AFFINITY_COLS = [f"log_aff_{r}" for r in RCPS]
 ABUNDANCE_COLS = [f"log_abund_{r}" for r in RCPS]
@@ -70,14 +70,10 @@ def init_optimize_df(experiment_df: pd.DataFrame) -> pd.DataFrame:
 
     # import affinities for each variant
     affinities = pd.read_excel(THIS_DIR / "affinity.xlsx")
-    # the receptors are the columns, except for variant
-    receptors = [col for col in affinities.columns if col != "variant"]
-    assert sorted(receptors) == sorted(
-        RCPS
-    ), f"Receptor columns do not match {receptors}"
+    affinities = affinities[["variant", *RCPS]]
     # prepend "log_aff_" to the columns (except for variant)
     affinities.rename(
-        columns={col: f"log_aff_{col}" for col in receptors}, inplace=True
+        columns={col: f"log_aff_{col}" for col in RCPS}, inplace=True
     )
     # log the affinities
     affinities[AFFINITY_COLS] = affinities[AFFINITY_COLS].apply(np.log10)
@@ -89,7 +85,7 @@ def init_optimize_df(experiment_df: pd.DataFrame) -> pd.DataFrame:
     opt_df["log_rbound_signal_coeff"] = -2.0
 
     # initialize the receptor abundances
-    for receptor in receptors:
+    for receptor in RCPS:
         opt_df[f"log_abund_{receptor}"] = 5.0
 
     opt_df["log_KxStar"] = -12.0
@@ -118,8 +114,7 @@ def infer_signal(opt_df: pd.DataFrame) -> np.ndarray:
         np.ones((opt_df.shape[0], 1)),
         Ka,
     )
-    # Assume signal is only dependent on 3A
-    return Rbound[:, 2] * 10 ** opt_df["log_rbound_signal_coeff"].values
+    return Rbound[:, 0] * 10 ** opt_df["log_rbound_signal_coeff"].values
 
 
 const_params = [
