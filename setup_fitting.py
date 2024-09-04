@@ -78,8 +78,9 @@ def init_optimize_df(experiment_df: pd.DataFrame) -> pd.DataFrame:
     opt_df["log_rbound_signal_coeff"] = -2.0
 
     # initialize the receptor abundances
-    for receptor in RCPS:
-        opt_df[f"log_abund_{receptor}"] = 5.0
+    # for receptor in RCPS:
+    #     opt_df[f"log_abund_{receptor}"] = 5.0
+    opt_df["log_abund_FcgRIIIA-158V"] = np.log10(2e3)
 
     opt_df["log_KxStar"] = -12.0
 
@@ -120,11 +121,11 @@ const_params = [
     "variant",
     "cytokine",
     "Tube #",
+    "log_abund_FcgRIIIA-158V",
 ]
 
 var_params = [
     "log_rbound_signal_coeff",
-    *ABUNDANCE_COLS,
     "eff_cancer_cell_valency",
 ]
 
@@ -135,6 +136,5 @@ stratifiers = {
 
 param_bounds = {
     "log_rbound_signal_coeff": (-9.0, 0.0),
-    **{col: (0.0, 10.0) for col in ABUNDANCE_COLS},
-    "eff_cancer_cell_valency": (0, 30),
+    "eff_cancer_cell_valency": (0, 100),
 }
