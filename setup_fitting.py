@@ -50,9 +50,7 @@ def init_optimize_df(experiment_df: pd.DataFrame) -> pd.DataFrame:
     ).rename("baseline_signal")
     # subtract the baseline signal from the signal, making sure the donor and time are aligned
     # merge the baseline signal into the opt_df
-    opt_df = opt_df.merge(
-        baselines, on=["donor"], how="left", validate="many_to_one"
-    )
+    opt_df = opt_df.merge(baselines, on=["donor"], how="left", validate="many_to_one")
     # subtract the baseline signal from the signal
     opt_df["signal"] = opt_df["signal"] - opt_df["baseline_signal"]
     # drop the baseline signal column
@@ -64,23 +62,18 @@ def init_optimize_df(experiment_df: pd.DataFrame) -> pd.DataFrame:
     # if signal is negative, set to 0
     opt_df["signal"] = opt_df["signal"].clip(lower=0)
 
-    # we are not treating concentration as a real concentration
-    # divide by minimum concentration so that the minimum valency is 1 when scaled by ab_ag_coefficient
-    opt_df["conc"] = opt_df["conc"] / opt_df["conc"].min()
+    opt_df["conc"] = opt_df["conc"].astype(np.float64) * 1e-9
 
     # import affinities for each variant
     affinities = pd.read_excel(THIS_DIR / "affinity.xlsx")
     affinities = affinities[["variant", *RCPS]]
     # prepend "log_aff_" to the columns (except for variant)
-    affinities.rename(
-        columns={col: f"log_aff_{col}" for col in RCPS}, inplace=True
-    )
+    affinities.rename(columns={col: f"log_aff_{col}" for col in RCPS}, inplace=True)
     # log the affinities
     affinities[AFFINITY_COLS] = affinities[AFFINITY_COLS].apply(np.log10)
     opt_df = opt_df.merge(affinities, on="variant")
 
-    opt_df["ab_ag_coefficient"] = 1.0
-    opt_df["log_eff_cancer_cell_conc"] = -8
+    opt_df["eff_cancer_cell_valency"] = 5.0
 
     opt_df["log_rbound_signal_coeff"] = -2.0
 
@@ -104,10 +97,10 @@ def infer_signal(opt_df: pd.DataFrame) -> np.ndarray:
         Array of inferred signals.
     """
     Rtot = 10 ** opt_df[ABUNDANCE_COLS].values
-    valency = (opt_df["ab_ag_coefficient"] * opt_df["conc"]).values[:, None, None]
+    valency = (opt_df["eff_cancer_cell_valency"]).values[:, None, None]
     Ka = 10 ** opt_df[AFFINITY_COLS].values[:, None, :]
     Rbound = infer_Rbound_batched(
-        10 ** opt_df["log_eff_cancer_cell_conc"],
+        opt_df["conc"].values,
         10 ** opt_df["log_KxStar"],
         Rtot,
         valency,
@@ -132,8 +125,7 @@ const_params = [
 var_params = [
     "log_rbound_signal_coeff",
     *ABUNDANCE_COLS,
-    "ab_ag_coefficient",
-    "log_eff_cancer_cell_conc",
+    "eff_cancer_cell_valency",
 ]
 
 # each var_param can be stratified by a constant_param or entire dataset
@@ -144,6 +136,5 @@ stratifiers = {
 param_bounds = {
     "log_rbound_signal_coeff": (-9.0, 0.0),
     **{col: (0.0, 10.0) for col in ABUNDANCE_COLS},
-    "ab_ag_coefficient": (1, 15),
-    "log_eff_cancer_cell_conc": (-17.0, -4.0),
+    "eff_cancer_cell_valency": (0, 30),
 }
