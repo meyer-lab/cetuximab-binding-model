@@ -1,23 +1,57 @@
-[tool.poetry]
+[project]
 name = "cetuximab-binding-model"
 version = "0.1.0"
 description = "Fitting a binding model to cetuximab cytokine release assay."
-authors = ["Armaan Abraham <armaanabraham@g.ucla.edu>"]
+authors = [
+    { name = "Armaan Abraham", email = "armaanabraham@g.ucla.edu" },
+]
+dependencies = [
+    "numpy>=1.26",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "ipykernel>=6.29.4",
+    "pandas>=2.2",
+    "openpyxl>=3.1.4",
+    "jax>=0.4.30",
+    "valentbind @ git+https://github.com/meyer-lab/valentBind.git@main",
+    "jaxopt @ git+https://github.com/google/jaxopt.git@4a50198",
+    "fit_framework @ git+https://github.com/meyer-lab/fit-framework.git@main",
+]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-numpy = "^1.26.4"
-matplotlib = "^3.9"
-seaborn = "^0.13"
-ipykernel = "^6.29.4"
-pandas = "^2.2"
-jax = "^0.4.30"
-jaxopt = {git = "https://github.com/google/jaxopt.git", rev = "4a50198"}
-ruff = "^0.5"
-openpyxl = "^3.1.5"
-
+requires-python = ">= 3.10"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pyright>=1.1",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["cetuximab-binding-model"]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # Unused arguments
+    "ARG",
+]
